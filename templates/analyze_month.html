@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Comparison for {{ crop }} in {{ place }}</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+        }
+        h2, h3 {
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+        }
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 80%;
+            margin: 0 auto;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            background-color: #222;
+            color: #fff;
+        }
+        th {
+            background-color: #555;
+        }
+        tr:nth-child(even) {
+            background-color: #333;
+        }
+        img {
+            display: block;
+            margin: 30px auto;
+            max-width: 90%;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #222;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #555;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #777;
+        }
+        #globeCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="globeCanvas"></canvas>
+
+    <h2>Price Comparison for {{ crop }} in {{ place }} ({{ year }})</h2>
+
+    <p><strong>Selected Month:</strong> {{ selected_month }}</p>
+    <p><strong>Previous Month:</strong> {{ previous_month }}</p>
+    <p>{{ message }}</p>
+
+    <!-- Month Selection Form -->
+    <form method="GET" action="/analyze_month">
+        <label for="month">Select Month:</label>
+        <select id="month" name="month">
+            {% for m in range(1, 13) %}
+                <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>Month {{ m }}</option>
+            {% endfor %}
+        </select>
+        <input type="hidden" name="place" value="{{ place }}">
+        <input type="hidden" name="crop" value="{{ crop }}">
+        <input type="hidden" name="year" value="{{ year }}">
+        <button type="submit">Analyze</button>
+    </form>
+
+    <h3>Price Comparison for Selected and Previous Months:</h3>
+
+    <div>
+        <img src="data:image/png;base64,{{ plot_url }}" alt="Price Comparison Plot">
+    </div>
+
+    <h4>Price Comparison Data:</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Month</th>
+                <th>Price (per Quintal)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in comparison_data %}
+            <tr>
+                <td>{{ record['Year'] }}</td>
+                <td>{{ record['Month'] }}</td>
+                <td>{{ record['Crop Price (per Quintal)'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h4>Historical Monthly Prices:</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Month-Year</th>
+                <th>Price (per Quintal)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in historical_data %}
+            <tr>
+                <td>{{ record['Month-Year'] }}</td>
+                <td>{{ record['Crop Price (per Quintal)'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button onclick="window.location.href='/'">Back to Home</button>
+
+    <script>
+        // Three.js Globe Initialization
+        const canvas = document.getElementById('globeCanvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create Sphere (Globe)
+        const globeGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const globeMaterial = new THREE.MeshBasicMaterial({
+            map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/earth.jpg'),
+        });
+        const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+        scene.add(globe);
+
+        // Add Ambient Light
+        const light = new THREE.AmbientLight(0xffffff);
+        scene.add(light);
+
+        // Position Camera
+        camera.position.z = 15;
+
+        // Animate the Globe
+        function animate() {
+            requestAnimationFrame(animate);
+            globe.rotation.y += 0.002; // Rotate globe
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

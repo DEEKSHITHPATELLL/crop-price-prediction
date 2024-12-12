@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyze Crop Price (Last 2 Years)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+        }
+
+        /* Fullscreen information box */
+        #info {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+
+        #info h1 {
+            font-size: 2.5em;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        #info h2 {
+            font-size: 1.8em;
+            color: #87CEEB;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+
+        ul li {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            color: #90EE90;
+        }
+
+        button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #007BFF;
+            color: white;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        /* Make the canvas take the full screen */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        img {
+            width: 80%;
+            max-width: 800px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            #info h1 {
+                font-size: 2em;
+            }
+
+            #info h2 {
+                font-size: 1.5em;
+            }
+
+            button {
+                font-size: 1.1em;
+                padding: 12px 24px;
+            }
+
+            img {
+                width: 90%;
+                max-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h1>Crop Price Analysis</h1>
+        <h2>{{ crop }} in {{ place }}</h2>
+        <h2>Past Prices</h2>
+        <ul>
+            {% for price in past_prices %}
+                <li><strong>Year:</strong> {{ price.Year }} | <strong>Price:</strong> {{ price['Crop Price (per Quintal)'] }}</li>
+            {% endfor %}
+        </ul>
+        <h2>Price Trend</h2>
+        <img src="data:image/png;base64,{{ plot_url }}" alt="Crop Price Trend">
+        <button onclick="window.location.href='/'">Back to Home</button>
+        <button onclick="window.location.href='/analyze_month?place={{ place }}&crop={{ crop }}&year={{ year }}'">Analyze Crop Price</button>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script>
+        // Three.js scene setup
+        const canvasContainer = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        canvasContainer.appendChild(renderer.domElement);
+
+        // Create rotating globe
+        const globeGeometry = new THREE.SphereGeometry(5, 64, 64);
+        const globeMaterial = new THREE.MeshStandardMaterial({
+            map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/earth.jpg'),
+            metalness: 0.4,
+            roughness: 0.7,
+        });
+        const globe = new THREE.Mesh(globeGeometry, globeMaterial);
+        scene.add(globe);
+
+        // Add ambient and directional lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 10, 10);
+        scene.add(directionalLight);
+
+        // Create floating particles around the globe
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 1000;
+        const positions = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            positions[i] = (Math.random() - 0.5) * 50;
+        }
+
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const particlesMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.1,
+        });
+        const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particles);
+
+        // Set camera position
+        camera.position.z = 15;
+
+        // Animate the globe and particles
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate the globe
+            globe.rotation.y += 0.002;
+
+            // Rotate the particles slightly
+            particles.rotation.y += 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>

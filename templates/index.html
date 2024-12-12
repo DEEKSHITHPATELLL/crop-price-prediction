@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Price Prediction</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three-globe"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            background-color: #0b1e36;
+            overflow: hidden;
+        }
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+        #form-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7);
+            width: 400px;
+            z-index: 2;
+        }
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        select, input[type="number"], input[type="submit"], button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        #chart-container {
+            width: 50%;
+            height: 400px;
+            margin-top: 20px;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="globeCanvas"></canvas>
+    <div id="container">
+        <div id="form-container">
+            <h1>Crop Price Prediction</h1>
+            <form action="/predict" method="POST">
+                <label for="place">Place:</label>
+                <select id="place" name="place" required>
+                    <option value="Bangalore">Bangalore</option>
+                    <option value="Mysore">Mysore</option>
+                    <option value="Hubli">Hubli</option>
+                    <option value="Mangalore">Mangalore</option>
+                    <option value="Belgaum">Belgaum</option>
+                    <option value="Davangere">Davangere</option>
+                    <option value="Ballari">Ballari</option>
+                    <option value="Gulbarga">Gulbarga</option>
+                    <option value="Bijapur">Bijapur</option>
+                    <option value="Shimoga">Shimoga</option>
+                    <option value="Tumkur">Tumkur</option>
+                    <option value="Raichur">Raichur</option>
+                    <option value="Hassan">Hassan</option>
+                    <option value="Mandya">Mandya</option>
+                    <option value="Chitradurga">Chitradurga</option>
+                    <option value="Udupi">Udupi</option>
+                    <option value="Chikmagalur">Chikmagalur</option>
+                    <option value="Bagalkot">Bagalkot</option>
+                    <option value="Hospet">Hospet</option>
+                    <option value="Bidar">Bidar</option>
+                    <option value="Chikballapur">Chikballapur</option>
+                    <option value="Kolar">Kolar</option>
+                    <option value="Gadag">Gadag</option>
+                    <option value="Haveri">Haveri</ ```html
+                    <option value="Karwar">Karwar</option>
+                    <option value="Koppal">Koppal</option>
+                    <option value="Yadgir">Yadgir</option>
+                    <option value="Kodagu">Kodagu</option>
+                    <option value="Ramanagara">Ramanagara</option>
+                    <option value="Sirsi">Sirsi</option>
+                    <option value="Dharwad">Dharwad</option>
+                    <option value="Chamarajanagar">Chamarajanagar</option>
+                    <option value="Bhadravati">Bhadravati</option>
+                    <option value="Madikeri">Madikeri</option>
+                    <option value="Sakleshpur">Sakleshpur</option>
+                    <option value="Tiptur">Tiptur</option>
+                    <option value="Sira">Sira</option>
+                    <option value="Doddaballapur">Doddaballapur</option>
+                    <option value="Kanakapura">Kanakapura</option>
+                    <option value="Malur">Malur</option>
+                    <option value="Hunsur">Hunsur</option>
+                    <option value="Kollegal">Kollegal</option>
+                    <option value="Arsikere">Arsikere</option>
+                    <option value="Nanjangud">Nanjangud</option>
+                    <option value="Muddebihal">Muddebihal</option>
+                    <option value="Athani">Athani</option>
+                    <option value="Gokak">Gokak</option>
+                    <option value="Ilkal">Ilkal</option>
+                    <option value="Jamkhandi">Jamkhandi</option>
+                    <option value="Ramdurg">Ramdurg</option>
+                    <option value="Saundatti">Saundatti</option>
+                    <option value="Banavasi">Banavasi</option>
+                    <option value="Basavana Bagewadi">Basavana Bagewadi</option>
+                    <option value="Kundapur">Kundapur</option>
+                    <option value="Ankola">Ankola</option>
+                    <option value="Byndoor">Byndoor</option>
+                    <option value="Siruguppa">Siruguppa</option>
+                    <option value="Sindhanur">Sindhanur</option>
+                    <option value="Pavagada">Pavagada</option>
+                    <option value="Chintamani">Chintamani</option>
+                    <option value="Mulbagal">Mulbagal</option>
+                    <option value="Kundgol">Kundgol</option>
+                    <option value="Nargund">Nargund</option>
+                    <option value="Ron">Ron</option>
+                    <option value="Yellapur">Yellapur</option>
+                    <option value="Shiggaon">Shiggaon</option>
+                    <option value="Savanur">Savanur</option>
+                    <option value="Hangal">Hangal</option>
+                    <option value="Terdal">Terdal</option>
+                    <option value="Mudhol">Mudhol</option>
+                    <option value="Navalgund">Navalgund</option>
+                    <option value="Harapanahalli">Harapanahalli</option>
+                    <option value="Sandur">Sandur</option>
+                    <option value="Mudalgi">Mudalgi</option>
+                    <option value="Gokarna">Gokarna</option>
+                    <option value="Honnavar">Honnavar</option>
+                    <option value="Siddapura">Siddapura</option>
+                    <option value="Dandeli">Dandeli</option>
+                    <option value="Kalghatgi">Kalghatgi</option>
+                    <option value="Haliyal">Haliyal</option>
+                    <option value="Mundgod">Mundgod</option>
+                    <option value="Kumta">Kumta</option>
+                    <option value="Sirsi">Sirsi</option>
+                    <option value="Karkala">Karkala</option>
+                    <option value="Kundapura">Kundapura</option>
+                    <option value="Bhatkal">Bhatkal</option>
+                    <option value="Hebri">Hebri</option>
+                    <option value="Padubidri">Padubidri</option>
+                    <option value="Surathkal">Surathkal</option>
+                    <option value="Shivamogga">Shivamogga</option>
+                    <option value="Tirthahalli ```html
+">Tirthahalli</option>
+                    <option value="Bhadravathi">Bhadravathi</option>
+                    <!-- Add other place options -->
+                </select>
+
+                <label for="crop">Crop:</label>
+                <select id="crop" name="crop" required>
+                    <option value="RICE">RICE</option>
+                    <option value="WHEAT">WHEAT</option>
+                    <option value="SUGARCANE">SUGARCANE</option>
+                    <option value="COTTON">COTTON</option>
+                    <option value="MAIZE">MAIZE</option>
+                    <option value="GROUNDNUT">GROUNDNUT</option>
+                    <option value="MOONG">MOONG</option>
+                    <option value="ARHAR">ARHAR</option>
+                    <!-- Add other crop options -->
+                </select>
+
+                <label for="year">Year:</label>
+                <select id="year" name="year" required>
+                    <option value="2019">2019</option>
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                </select>
+
+                <label for="month">Month:</label>
+                <select id="month" name="month" required>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select>
+
+                <label for="rainfall">Average Rainfall (mm):</label>
+                <input type="number" id="rainfall" name="rainfall" required>
+
+                <input type="submit" value="Predict">
+            </form>
+
+            {% if prediction %}
+            <h2>Prediction Results:</h2>
+            <p><strong>Location:</strong> {{ place }}</p>
+            <p><strong>Crop:</strong> {{ crop }}</p>
+            <p><strong>Year:</strong> {{ year }}</p>
+            <p><strong>Month:</strong> {{ month }}</p>
+            <p><strong>Average Rainfall:</strong> {{ rainfall }} mm</p>
+            <p><strong>Predicted Crop Price:</strong> {{ prediction }} per quintal</p>
+            <p><strong>Price Range:</strong> {{ min_price }} - {{ max_price }} Rs</p>
+            {% endif %}
+
+            <button onclick="window.location.href='/analyze_year?place={{ place }}&crop={{ crop }}&year={{ year }}'">Analyze Crop Price (Last 2 Years)</button>
+            <button onclick="window.location.href='/analyze_month?place={{ place }}&crop={{ crop }}&year={{ year }}'">Analyze Crop Price (Same Year, Different Months)</button>
+        </div>
+    </div>
+
+    <!-- Chart.js Container -->
+    <div id="chart-container">
+        <canvas id="priceChart"></canvas>
+    </div>
+
+    <script>
+       const ctx = document.getElementById('priceChart').getContext('2d');
+
+const priceChart = new Chart(ctx, {
+    type: 'line',  // Bar chart type
+    data: {
+        labels: labels,  // Years
+        datasets: [{
+            label: 'Crop Price (Rs per Quintal)',  // Label for the dataset
+            data: prices,  // Prices for each year
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+ }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Price (Rs per Quintal)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Year'
+                }
+            }
+        }
+    }
+});
+    </script>
+</body>
+</html>
