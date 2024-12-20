@@ -4,284 +4,318 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crop Price Prediction</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three-globe"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2E7D32;
+            --secondary-color: #388E3C;
+            --accent-color: #FDD835;
+            --bg-gradient-start: #81C784;
+            --bg-gradient-end: #C8E6C9;
+        }
+
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            color: #ffffff;
-            background-color: #0b1e36;
-            overflow: hidden;
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            min-height: 100vh;
+            color: #1B5E20;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            padding: 20px 0;
         }
-        #container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            position: relative;
-            z-index: 1;
-        }
-        #form-container {
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 10px;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.7);
-            width: 400px;
-            z-index: 2;
         }
-        h1, h2 {
+
+        .header {
             text-align: center;
+            margin-bottom: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
             margin-bottom: 20px;
+            color: var(--primary-color);
         }
-        label {
-            display: block;
-            margin: 10px 0 5px;
+
+        .header p {
+            font-size: 1.2em;
+            color: #33691E;
         }
-        select, input[type="number"], input[type="submit"], button {
-            width: 100%;
-            padding: 8px;
+
+        .feature-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-box i {
+            font-size: 3em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-box:hover i {
+            transform: scale(1.1);
+            color: var(--accent-color);
+        }
+
+        .feature-box h3 {
+            color: var(--primary-color);
             margin-bottom: 15px;
+        }
+
+        .feature-box p {
+            color: #33691E;
+        }
+
+        .calculator-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .calculator-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #A5D6A7;
+            color: #1B5E20;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: #FFFFFF;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(253, 216, 53, 0.25);
+        }
+
+        .form-select option {
+            background-color: #FFFFFF;
+            color: #1B5E20;
+            padding: 10px;
+        }
+
+        .form-label {
+            color: #1B5E20;
+            font-weight: 500;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
         }
-        input[type="submit"] {
-            background-color: #28a745;
-            color: white;
-            font-weight: bold;
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-icon {
+            color: var(--primary-color);
+            margin-left: 5px;
             cursor: pointer;
         }
-        input[type="submit"]:hover {
-            background-color: #218838;
-        }
-        button {
-            background-color: #007bff;
+
+        .tooltiptext {
+            visibility: hidden;
+            background-color: rgba(46, 125, 50, 0.95);
             color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        canvas {
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
             position: absolute;
-            top: 0;
-            left: 0;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            width: 200px;
+            font-size: 0.9em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        #chart-container {
-            width: 50%;
-            height: 400px;
-            margin-top: 20px;
-            z-index: 2;
+
+        .tooltip-container:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .calculator-section {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .feature-box {
+                margin-bottom: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <canvas id="globeCanvas"></canvas>
-    <div id="container">
-        <div id="form-container">
-            <h1>Crop Price Prediction</h1>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-seedling"></i> Crop Price Prediction</h1>
+            <p>Get accurate predictions for crop prices based on historical data and weather conditions</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="feature-box">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Price Analysis</h3>
+                    <p>Advanced algorithms to predict crop prices with high accuracy</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('weather') }}" class="text-decoration-none">
+                    <div class="feature-box">
+                        <i class="fas fa-cloud-rain"></i>
+                        <h3>Weather Impact</h3>
+                        <p>See how weather affects crop prices in your region</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="calculator-section">
+            <h2><i class="fas fa-calculator"></i> Price Calculator</h2>
             <form action="/predict" method="POST">
-                <label for="place">Place:</label>
-                <select id="place" name="place" required>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Mysore">Mysore</option>
-                    <option value="Hubli">Hubli</option>
-                    <option value="Mangalore">Mangalore</option>
-                    <option value="Belgaum">Belgaum</option>
-                    <option value="Davangere">Davangere</option>
-                    <option value="Ballari">Ballari</option>
-                    <option value="Gulbarga">Gulbarga</option>
-                    <option value="Bijapur">Bijapur</option>
-                    <option value="Shimoga">Shimoga</option>
-                    <option value="Tumkur">Tumkur</option>
-                    <option value="Raichur">Raichur</option>
-                    <option value="Hassan">Hassan</option>
-                    <option value="Mandya">Mandya</option>
-                    <option value="Chitradurga">Chitradurga</option>
-                    <option value="Udupi">Udupi</option>
-                    <option value="Chikmagalur">Chikmagalur</option>
-                    <option value="Bagalkot">Bagalkot</option>
-                    <option value="Hospet">Hospet</option>
-                    <option value="Bidar">Bidar</option>
-                    <option value="Chikballapur">Chikballapur</option>
-                    <option value="Kolar">Kolar</option>
-                    <option value="Gadag">Gadag</option>
-                    <option value="Haveri">Haveri</ ```html
-                    <option value="Karwar">Karwar</option>
-                    <option value="Koppal">Koppal</option>
-                    <option value="Yadgir">Yadgir</option>
-                    <option value="Kodagu">Kodagu</option>
-                    <option value="Ramanagara">Ramanagara</option>
-                    <option value="Sirsi">Sirsi</option>
-                    <option value="Dharwad">Dharwad</option>
-                    <option value="Chamarajanagar">Chamarajanagar</option>
-                    <option value="Bhadravati">Bhadravati</option>
-                    <option value="Madikeri">Madikeri</option>
-                    <option value="Sakleshpur">Sakleshpur</option>
-                    <option value="Tiptur">Tiptur</option>
-                    <option value="Sira">Sira</option>
-                    <option value="Doddaballapur">Doddaballapur</option>
-                    <option value="Kanakapura">Kanakapura</option>
-                    <option value="Malur">Malur</option>
-                    <option value="Hunsur">Hunsur</option>
-                    <option value="Kollegal">Kollegal</option>
-                    <option value="Arsikere">Arsikere</option>
-                    <option value="Nanjangud">Nanjangud</option>
-                    <option value="Muddebihal">Muddebihal</option>
-                    <option value="Athani">Athani</option>
-                    <option value="Gokak">Gokak</option>
-                    <option value="Ilkal">Ilkal</option>
-                    <option value="Jamkhandi">Jamkhandi</option>
-                    <option value="Ramdurg">Ramdurg</option>
-                    <option value="Saundatti">Saundatti</option>
-                    <option value="Banavasi">Banavasi</option>
-                    <option value="Basavana Bagewadi">Basavana Bagewadi</option>
-                    <option value="Kundapur">Kundapur</option>
-                    <option value="Ankola">Ankola</option>
-                    <option value="Byndoor">Byndoor</option>
-                    <option value="Siruguppa">Siruguppa</option>
-                    <option value="Sindhanur">Sindhanur</option>
-                    <option value="Pavagada">Pavagada</option>
-                    <option value="Chintamani">Chintamani</option>
-                    <option value="Mulbagal">Mulbagal</option>
-                    <option value="Kundgol">Kundgol</option>
-                    <option value="Nargund">Nargund</option>
-                    <option value="Ron">Ron</option>
-                    <option value="Yellapur">Yellapur</option>
-                    <option value="Shiggaon">Shiggaon</option>
-                    <option value="Savanur">Savanur</option>
-                    <option value="Hangal">Hangal</option>
-                    <option value="Terdal">Terdal</option>
-                    <option value="Mudhol">Mudhol</option>
-                    <option value="Navalgund">Navalgund</option>
-                    <option value="Harapanahalli">Harapanahalli</option>
-                    <option value="Sandur">Sandur</option>
-                    <option value="Mudalgi">Mudalgi</option>
-                    <option value="Gokarna">Gokarna</option>
-                    <option value="Honnavar">Honnavar</option>
-                    <option value="Siddapura">Siddapura</option>
-                    <option value="Dandeli">Dandeli</option>
-                    <option value="Kalghatgi">Kalghatgi</option>
-                    <option value="Haliyal">Haliyal</option>
-                    <option value="Mundgod">Mundgod</option>
-                    <option value="Kumta">Kumta</option>
-                    <option value="Sirsi">Sirsi</option>
-                    <option value="Karkala">Karkala</option>
-                    <option value="Kundapura">Kundapura</option>
-                    <option value="Bhatkal">Bhatkal</option>
-                    <option value="Hebri">Hebri</option>
-                    <option value="Padubidri">Padubidri</option>
-                    <option value="Surathkal">Surathkal</option>
-                    <option value="Shivamogga">Shivamogga</option>
-                    <option value="Tirthahalli ```html
-">Tirthahalli</option>
-                    <option value="Bhadravathi">Bhadravathi</option>
-                    <!-- Add other place options -->
-                </select>
+                <div class="mb-4">
+                    <label for="place" class="form-label">
+                        Market Location
+                        <span class="tooltip-container">
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                            <span class="tooltiptext">Select your nearest market location</span>
+                        </span>
+                    </label>
+                    <select class="form-select" id="place" name="place" required>
+                        {% for place in places %}
+                        <option value="{{ place }}">{{ place }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                <label for="crop">Crop:</label>
-                <select id="crop" name="crop" required>
-                    <option value="RICE">RICE</option>
-                    <option value="WHEAT">WHEAT</option>
-                    <option value="SUGARCANE">SUGARCANE</option>
-                    <option value="COTTON">COTTON</option>
-                    <option value="MAIZE">MAIZE</option>
-                    <option value="GROUNDNUT">GROUNDNUT</option>
-                    <option value="MOONG">MOONG</option>
-                    <option value="ARHAR">ARHAR</option>
-                    <!-- Add other crop options -->
-                </select>
+                <div class="mb-4">
+                    <label for="month" class="form-label">
+                        Month
+                        <span class="tooltip-container">
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                            <span class="tooltiptext">Select the month for prediction</span>
+                        </span>
+                    </label>
+                    <select class="form-select" id="month" name="month" required>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                </div>
 
-                <label for="year">Year:</label>
-                <select id="year" name="year" required>
-                    <option value="2019">2019</option>
-                    <option value="2020">2020</option>
-                    <option value="2021">2021</option>
-                    <option value="2022">2022</option>
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                </select>
+                <div class="mb-4">
+                    <label for="crop" class="form-label">
+                        Crop Type
+                        <span class="tooltip-container">
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                            <span class="tooltiptext">Select your crop type</span>
+                        </span>
+                    </label>
+                    <select class="form-select" id="crop" name="crop" required>
+                        {% for crop in crops %}
+                        <option value="{{ crop }}">{{ crop }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-                <label for="month">Month:</label>
-                <select id="month" name="month" required>
-                    <option value="January">January</option>
-                    <option value="February">February</option>
-                    <option value="March">March</option>
-                    <option value="April">April</option>
-                    <option value="May">May</option>
-                    <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option>
-                </select>
+                <div class="mb-4">
+                    <label for="year" class="form-label">
+                        Year
+                        <span class="tooltip-container">
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                            <span class="tooltiptext">Enter the year for prediction</span>
+                        </span>
+                    </label>
+                    <input type="number" class="form-control" id="year" name="year" required min="2000" max="2050" value="2024">
+                </div>
 
-                <label for="rainfall">Average Rainfall (mm):</label>
-                <input type="number" id="rainfall" name="rainfall" required>
+                <div class="mb-4">
+                    <label for="rainfall" class="form-label">
+                        Rainfall (mm)
+                        <span class="tooltip-container">
+                            <i class="fas fa-info-circle tooltip-icon"></i>
+                            <span class="tooltiptext">Enter expected rainfall in millimeters</span>
+                        </span>
+                    </label>
+                    <input type="number" class="form-control" id="rainfall" name="rainfall" required step="0.01" min="0">
+                </div>
 
-                <input type="submit" value="Predict">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-calculator"></i> Calculate Price
+                </button>
             </form>
-
-            {% if prediction %}
-            <h2>Prediction Results:</h2>
-            <p><strong>Location:</strong> {{ place }}</p>
-            <p><strong>Crop:</strong> {{ crop }}</p>
-            <p><strong>Year:</strong> {{ year }}</p>
-            <p><strong>Month:</strong> {{ month }}</p>
-            <p><strong>Average Rainfall:</strong> {{ rainfall }} mm</p>
-            <p><strong>Predicted Crop Price:</strong> {{ prediction }} per quintal</p>
-            <p><strong>Price Range:</strong> {{ min_price }} - {{ max_price }} Rs</p>
-            {% endif %}
-
-            <button onclick="window.location.href='/analyze_year?place={{ place }}&crop={{ crop }}&year={{ year }}'">Analyze Crop Price (Last 2 Years)</button>
-            <button onclick="window.location.href='/analyze_month?place={{ place }}&crop={{ crop }}&year={{ year }}'">Analyze Crop Price (Same Year, Different Months)</button>
         </div>
     </div>
 
-    <!-- Chart.js Container -->
-    <div id="chart-container">
-        <canvas id="priceChart"></canvas>
-    </div>
-
-    <script>
-       const ctx = document.getElementById('priceChart').getContext('2d');
-
-const priceChart = new Chart(ctx, {
-    type: 'line',  // Bar chart type
-    data: {
-        labels: labels,  // Years
-        datasets: [{
-            label: 'Crop Price (Rs per Quintal)',  // Label for the dataset
-            data: prices,  // Prices for each year
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
- }]
-    },
-    options: {
-        responsive: true,
-        scales: {
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Price (Rs per Quintal)'
-                }
-            },
-            x: {
-                title: {
-                    display: true,
-                    text: 'Year'
-                }
-            }
-        }
-    }
-});
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

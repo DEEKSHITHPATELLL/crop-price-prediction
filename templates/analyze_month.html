@@ -3,181 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Price Comparison for {{ crop }} in {{ place }}</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Monthly Analysis - {{ crop }} in {{ place }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #fff;
-            overflow: hidden;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
-        h2, h3 {
-            text-align: center;
-            margin-top: 20px;
-            color: #fff;
+        .container {
+            max-width: 1200px;
+            margin: auto;
         }
-        table {
-            margin-top: 20px;
-            border-collapse: collapse;
-            width: 80%;
-            margin: 0 auto;
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-            background-color: #222;
-            color: #fff;
+        .stats-box {
+            background: rgba(76, 175, 80, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(76, 175, 80, 0.2);
         }
-        th {
-            background-color: #555;
+        h1, h2, h3 {
+            color: #4CAF50;
+            margin-bottom: 20px;
         }
-        tr:nth-child(even) {
-            background-color: #333;
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        img {
-            display: block;
-            margin: 30px auto;
-            max-width: 90%;
-            border: 1px solid #ddd;
-            padding: 10px;
-            background-color: #222;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #555;
+        .btn-back {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
             border: none;
-            cursor: pointer;
-            font-size: 16px;
-            display: block;
-            margin: 20px auto;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
         }
-        button:hover {
-            background-color: #777;
+        .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            color: white;
         }
-        #globeCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .trend-up {
+            color: #4CAF50;
+        }
+        .trend-down {
+            color: #dc3545;
         }
     </style>
 </head>
 <body>
-    <canvas id="globeCanvas"></canvas>
+    <div class="container">
+        <div class="analysis-card">
+            <h1 class="text-center">Monthly Price Analysis for {{ crop }} in {{ place }}</h1>
+            
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% else %}
+            <h2>Analysis for {{ selected_month }}</h2>
+            
+            <div class="stats-box">
+                <h3>Price Statistics</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Average Price:</strong> ₹{{ "%.2f"|format(stats.average_price) }}</p>
+                        <p><strong>Maximum Price:</strong> ₹{{ "%.2f"|format(stats.max_price) }}</p>
+                        <p><strong>Minimum Price:</strong> ₹{{ "%.2f"|format(stats.min_price) }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Price Volatility:</strong> ₹{{ "%.2f"|format(stats.price_volatility) }}</p>
+                        <p><strong>Price Trend:</strong> <span class="trend-{{ stats.trend.lower() }}">{{ stats.trend }}</span></p>
+                        {% if stats.yoy_change != 0 %}
+                        <p><strong>Year-over-Year Change:</strong> 
+                            <span class="{% if stats.yoy_change > 0 %}text-success{% else %}text-danger{% endif %}">
+                                {{ "%.1f"|format(stats.yoy_change) }}% ({{ stats.yoy_direction }})
+                            </span>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
-    <h2>Price Comparison for {{ crop }} in {{ place }} ({{ year }})</h2>
+            <div class="chart-container">
+                <p class="text-muted mb-3">
+                    Note: For months with missing data, prices are estimated based on historical averages and trends
+                </p>
+                <img src="data:image/png;base64,{{ plot_url }}" alt="Price Analysis Charts" style="width: 100%; height: auto;">
+            </div>
+            {% endif %}
 
-    <p><strong>Selected Month:</strong> {{ selected_month }}</p>
-    <p><strong>Previous Month:</strong> {{ previous_month }}</p>
-    <p>{{ message }}</p>
-
-    <!-- Month Selection Form -->
-    <form method="GET" action="/analyze_month">
-        <label for="month">Select Month:</label>
-        <select id="month" name="month">
-            {% for m in range(1, 13) %}
-                <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>Month {{ m }}</option>
-            {% endfor %}
-        </select>
-        <input type="hidden" name="place" value="{{ place }}">
-        <input type="hidden" name="crop" value="{{ crop }}">
-        <input type="hidden" name="year" value="{{ year }}">
-        <button type="submit">Analyze</button>
-    </form>
-
-    <h3>Price Comparison for Selected and Previous Months:</h3>
-
-    <div>
-        <img src="data:image/png;base64,{{ plot_url }}" alt="Price Comparison Plot">
+            <div class="mt-4">
+                <a href="/" class="btn-back">Back to Home</a>
+            </div>
+        </div>
     </div>
-
-    <h4>Price Comparison Data:</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Year</th>
-                <th>Month</th>
-                <th>Price (per Quintal)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in comparison_data %}
-            <tr>
-                <td>{{ record['Year'] }}</td>
-                <td>{{ record['Month'] }}</td>
-                <td>{{ record['Crop Price (per Quintal)'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h4>Historical Monthly Prices:</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Month-Year</th>
-                <th>Price (per Quintal)</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in historical_data %}
-            <tr>
-                <td>{{ record['Month-Year'] }}</td>
-                <td>{{ record['Crop Price (per Quintal)'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <button onclick="window.location.href='/'">Back to Home</button>
-
-    <script>
-        // Three.js Globe Initialization
-        const canvas = document.getElementById('globeCanvas');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ canvas });
-
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Create Sphere (Globe)
-        const globeGeometry = new THREE.SphereGeometry(5, 32, 32);
-        const globeMaterial = new THREE.MeshBasicMaterial({
-            map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/earth.jpg'),
-        });
-        const globe = new THREE.Mesh(globeGeometry, globeMaterial);
-        scene.add(globe);
-
-        // Add Ambient Light
-        const light = new THREE.AmbientLight(0xffffff);
-        scene.add(light);
-
-        // Position Camera
-        camera.position.z = 15;
-
-        // Animate the Globe
-        function animate() {
-            requestAnimationFrame(animate);
-            globe.rotation.y += 0.002; // Rotate globe
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Handle Window Resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
